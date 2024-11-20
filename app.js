@@ -55,7 +55,7 @@ app.use(cors()); //mở cổng để các hệ thống khác truy cập
 //Kết nối với mongoose
 mongoose.connect('mongodb+srv://tth06102004:0902851922@cluster0.s89ky.mongodb.net/dataManT?retryWrites=true&w=majority&appName=Cluster0')
   .then(() => { console.log('MongoDB connected successfully!') })
-  .catch(() => { console.log('MongoDB connection failed:', error.message) })
+  .catch((error) => { console.log('MongoDB connection failed:', error.message) })
 
 
 // http://localhost:8080
