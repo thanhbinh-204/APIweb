@@ -25,4 +25,4 @@ const CategoryShema = new Schema({
     }
 })
 
-module.exports = mongoose.models.category || mongoose.model('category', CategoryShema);
+module.exports = mongoose.models.category || mongoose.model('Category', CategoryShema);

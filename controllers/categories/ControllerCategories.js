@@ -1,4 +1,6 @@
 const ModelCategory = require('./ModelCategory');
+const ModelProduct = require('../product/ModelProduct');
+const mongoose = require('mongoose');
 
 //getcate
 const getCategories = async (page, limit, keyword) => {
@@ -72,16 +74,23 @@ const updateCate = async (id, name, brand, image) => {
 
 const deleteCate = async (idCate) => {
     try {
-        const CateInDB = ModelCategory.findById(idCate);
-        if (!CateInDB) {
-            throw new Error('Nhãn hàng không tồn tại');
+        const cateInDB = await ModelCategory.findById(idCate);
+        if (!cateInDB) {
+            throw new Error('Danh mục không tồn tại.');
+        }
+        
+        const categoryObjectId = new mongoose.Types.ObjectId(idCate);
+        const isReferencedInProducts = await ModelProduct.exists({ 'category.category_id': categoryObjectId });
+        console.log(isReferencedInProducts)
+        if (isReferencedInProducts) {
+            throw new Error('Không thể xóa danh mục vì nó đang được tham chiếu bởi sản phẩm.');
         }
 
-        let result = ModelCategory.findByIdAndDelete(idCate);
-        return result;
+        const deteleCategory = await ModelCategory.findByIdAndDelete(idCate);
+        return { message: 'Danh mục đã được xóa thành công.', deteleCategory};
     } catch (error) {
-        console.log('Xóa danh sách lỗi', error);
-        throw new Error('Xóa danh sách lỗi');
+        console.error('Xóa danh mục lỗi: ', error);
+        throw new Error(error.message);
     }
 }
 

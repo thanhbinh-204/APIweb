@@ -1,6 +1,8 @@
 const Voucher = require('../voucher/ModelVoucher');
 const UserModel = require('../user/userModel');
 const ModelVoucher = require('../voucher/ModelVoucher');
+const ModelCart = require('../carts/ModelCart')
+const mongoose = require('mongoose');
 
 const getallVoucher = async function (page, limit, keyword) {
     try {
@@ -95,7 +97,7 @@ const claimVoucher = async (user, voucherCode) => {
         }
 
         // Kiểm tra nếu người dùng đã có voucher này
-        if (userInDB.vouchers && userInDB.vouchers.includes(voucher._id)) {
+        if (userInDB.vouchers && userInDB.vouchers.some(v => v.voucherId.toString() === voucher._id.toString())) {
             throw new Error('Người dùng đã lấy Voucher này rồi.');
         }
 
@@ -165,11 +167,21 @@ const useVoucher = async ( user, voucherCode ) => {
 
 const deleteVoucher = async (idVoucher) => {
     try {
-        let IDvoucher = ModelVoucher.findByIdAndDelete(idVoucher);
+        let IDvoucher = ModelVoucher.findById(idVoucher);
         if (!IDvoucher) {
             throw new Error('Không tìm thấy voucher');
         }
-        return IDvoucher;
+        
+        const VoucherObjectId = new mongoose.Types.ObjectId(idVoucher);
+        const isReferencedInUser = await UserModel.exists(VoucherObjectId);
+        const isReferencedInOrder = await ModelCart.exists(VoucherObjectId);
+        if(isReferencedInUser || isReferencedInOrder){
+            throw new Error('Không thể xóa Voucher vì nó đang được sử dụng.');
+        }
+
+        const deleteVoucher = await ModelVoucher.findByIdAndDelete(VoucherObjectId);
+        
+        return { message: 'Nhà cung cấp đã được xóa thành công.', deleteVoucher};
     } catch (error) {
         console.log('Xóa voucher thất bại', error);
         throw new Error('Xóa voucher thất bại');  

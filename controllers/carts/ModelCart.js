@@ -24,6 +24,18 @@ const CartSchema = new Schema({
         enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled'],
         default: 'pending'
     },
+    shippingAddress: {
+        type: String,
+    },
+    paymentMethod: {
+        type: String,
+        default: 'pay_online'
+    },
+    paymentStatus: {
+        type: String,
+        enum: ['pending' , 'paid' , 'failed'],
+        default: 'pending'
+    },
     date: {
         type: Date,
         default: Date.now

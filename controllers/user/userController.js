@@ -133,6 +133,9 @@ const login = async (email, password) => {
             throw new Error('Tài khoản chưa được xác thực');
         }
 
+        userInDB.lastLogin = new Date();
+        await userInDB.save();
+
         // Kiểm tra mật khẩu
         const result = bcrypt.compareSync(password, userInDB.password);
         if (result) {
@@ -212,7 +215,6 @@ const deleteuser = async (id) => {
         console.log('Error: ', error);
         throw new Error('Error when delete user')
     }
-    return null;
 }
 
 const getAllCustomers = async (page, limit, keyword) => {
@@ -224,11 +226,8 @@ const getAllCustomers = async (page, limit, keyword) => {
         // query : điều kiện tìm kiếm
         let query = {};// nếu là 1 object rõng là không có điều kiện tìm kiếm
         query = {
-            ...query,
-
+            role: 1
         }
-
-
         let allCustomers = await userModel
             .find(query)
             // Bỏ qua bao nhiêu sản phẩm
@@ -259,8 +258,63 @@ const getCustomerbyID = async (userID) => {
     }
 }
 
+const getAllAdmins = async (page, limit, keyword) => {
+    try {
+        page = parseInt(page) || 1;
+        limit = parseInt(limit) || 10;
+        let skip = (page - 1) * limit;
+        let sort = { create_at: -1 };// 1: tăng dần, -1: giảm dần
+        // query : điều kiện tìm kiếm
+        let query = {};// nếu là 1 object rõng là không có điều kiện tìm kiếm
+        query = {
+            role: 'Admin'
+        }
+
+
+        let allCustomers = await userModel
+            .find(query)
+            // Bỏ qua bao nhiêu sản phẩm
+            .skip(skip)
+            // Giới hạn số lượng sản phẩm 
+            .limit(limit)
+            // Sắp xếp theo thời gian tạo
+            .sort(sort);
+        return allCustomers;
+    } catch (error) {
+        console.log('Lấy danh sách khách hàng lỗi: ', error);
+        throw new Error('Lấy danh sách khách hàng lỗi');
+    }
+} 
+
+const registerAdmin = async (email, password, username, role) => {
+    try {
+        // Kiểm tra xem email có tồn tại không
+        let userInDB = await userModel.findOne({ email });
+        if (userInDB) {
+            throw new Error('Email đã tồn tại');
+        }
+
+        if (password && password.length < 6) {
+            throw new Error('Mật khẩu phải dài hơn 6 kí tự');
+        }
+
+        // Mã hóa mật khẩu
+        const salt = bcrypt.genSaltSync(10);
+        const hashedpassword = bcrypt.hashSync(password, salt);
+
+        // Tạo user với trạng thái chưa xác minh và lưu OTP vào database
+        user = new userModel({ email, password: hashedpassword, username, verified: true, role });
+        const result = await user.save();
+
+        return result;
+    } catch (error) {
+        console.log('Register error:', error.message);
+        throw new Error(error.message);
+    }
+};
 
 
 
 module.exports = { register, login, updateuser, deleteuser, 
-    verifyOTP, forgetpassword, newverifyOTP, getAllCustomers, getCustomerbyID }
+    verifyOTP, forgetpassword, newverifyOTP, getAllCustomers,
+     getCustomerbyID, getAllAdmins, registerAdmin }

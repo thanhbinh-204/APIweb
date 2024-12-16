@@ -25,7 +25,8 @@ const userSchema = new Schema({
     },
     role: {
         type: String,
-        default: 1, //1: Member, 2: Admin
+        enum: ['Customer', 'Admin', 'SuperAdmin'],
+        default: 'Customer', //1: Member, 2: Admin
     },
     status: {
         type: Boolean,
@@ -58,12 +59,14 @@ const userSchema = new Schema({
     updateAt: {
         type: Date,
         default: Date.now()
+    },
+    lastLogin: {
+        type: Date,
+        default: Date.now()
     }
-
-
 })
 
 
 
 // tên colection: tiếng anh, viết thường và số ít
-module.exports = mongoose.model.user || mongoose.model('user', userSchema);
+module.exports = mongoose.model.user || mongoose.model('User', userSchema);

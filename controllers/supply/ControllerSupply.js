@@ -1,4 +1,6 @@
+const ModelProduct = require('../product/ModelProduct');
 const Supplier = require('./ModelSupply'); 
+const mongoose = require('mongoose');
 
 // lấy danh sách nhà cung cấp
 const getSuppliers = async (page, limit, keyword) => {
@@ -63,13 +65,25 @@ const updateSupplier = async (id, name) => {
 
 // Xóa nhà cung cấp
 const deleteSupplier = async (id) => {
-    const deletedSupplier = await Supplier.findByIdAndDelete(id);
+    try {
+        const supplierDB = await Supplier.findById(id);
+        if (!supplierDB) {
+            throw new Error('Nhà cung cấp không tồn tại.');
+        }
 
-    if (!deletedSupplier) {
-        throw new Error('Nhà cung cấp không tồn tại.');
+        const supplyObjectId = new mongoose.Types.ObjectId(id);
+        const isReferencedInProducts = await ModelProduct.exists({ 'supplier.supply_id': supplyObjectId });
+        if (isReferencedInProducts) {
+            throw new Error('Không thể xóa nhà cung cấp vì nó đang được sử dụng bởi sản phẩm.');
+        }
+        
+        const deletedSupplier = await Supplier.findByIdAndDelete(id);
+
+        return { message: 'Nhà cung cấp đã được xóa thành công.', deletedSupplier};
+    } catch (error) {
+        console.error('Xóa nhà cung cấp lỗi: ', error);
+        throw new Error(error.message);
     }
-
-    return { message: 'Nhà cung cấp đã được xóa thành công.' };
 };
 
 

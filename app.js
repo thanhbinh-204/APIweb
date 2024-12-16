@@ -29,6 +29,7 @@ const categoriesRouter = require('./routes/categories');
 const vouchersRouter = require('./routes/vouchers');
 const supplysRouter = require('./routes/supplys');
 const feedbackRouter = require('./routes/feedbacks');
+const paymentRouter = require('./routes/payments');
 
 
 
@@ -52,17 +53,12 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors()); //mở cổng để các hệ thống khác truy cập
 
 //----------------------------------------
-//Kết nối với mongoose
-const dbUri = process.env.MONGO_URI || 'mongodb+srv://tth06102004:0902851922@cluster0.s89ky.mongodb.net/dataManT?retryWrites=true&w=majority';
-mongoose.connect(dbUri, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log('Connected to MongoDB'))
-  .catch(error => console.error('MongoDB connection error:', error));
+//Kết nối với mongoose: mongodb+srv://tth06102004:0902851922@cluster0.s89ky.mongodb.net/dataManT?retryWrites=true&w=majority&appName=Cluster0
+mongoose.connect('mongodb://localhost:27017/APIDUAN')
+  .then(() => { console.log('Connect succes') })
+  .catch(() => { console.log('Fail') })
 
-
-// http://localhost:8080
-app.use('/', indexRouter);
-
-// http://localhost:8080/users
+//localhost:8080/users
 app.use('/users', usersRouter);
 
 // http://localhost:8080/products
@@ -82,6 +78,9 @@ app.use('/supplys', supplysRouter);
 
 // http://localhost:8080/feedbacks
 app.use('/feedbacks', feedbackRouter);
+
+// http://localhost:8080/payments
+app.use('/payments', paymentRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

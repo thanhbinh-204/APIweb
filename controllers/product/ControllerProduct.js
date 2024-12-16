@@ -2,6 +2,7 @@ const ModelProduct = require('./ModelProduct');
 const ModelCategory = require('../categories/ModelCategory');
 const ModelSupply = require('../supply/ModelSupply');
 const mongoose = require('mongoose');
+const ModelCart = require('../carts/ModelCart');
 
 
 
@@ -174,6 +175,11 @@ const remove = async (id) => {
         const productDB = await ModelProduct.findById(id);
         if (!productDB) {
             throw new Error('Sản phẩm không tồn tại');
+        }
+
+        const isReferencedInOrders = await ModelCart.exists({ 'products._id': id });
+        if (isReferencedInOrders) {
+            throw new Error('Không thể xóa sản phẩm vì nó đang được sử dụng trong đơn hàng');
         }
 
         let result = await ModelProduct.findByIdAndDelete(id);

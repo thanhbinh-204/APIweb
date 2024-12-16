@@ -124,7 +124,7 @@ router.get('/customers', async function (req, res, next) {
       const categories = await userController.getAllCustomers(page, limit, keyword);
       return res.status(200).json({ status: true, data: categories });
   } catch (error) {
-      console.log('Lấy tất danh sách khách hàng lỗi lỗi: ', error);
+      console.log('Lấy tất danh sách khách hàng lỗi: ', error);
       return res.status(400).json({ status: false, error: error });
   }
 })
@@ -135,11 +135,33 @@ router.post('/customerByID/:id', async function (req, res, next) {
       const categories = await userController.getCustomerbyID(id);
       return res.status(200).json({ status: true, data: categories });
   } catch (error) {
-      console.log('Lấy tất danh sách khách hàng lỗi lỗi: ', error);
+      console.log('Lấy tất danh sách khách hàng lỗi: ', error);
       return res.status(400).json({ status: false, error: error });
   }
 })
 
+router.get('/admins', async function (req, res, next) {
+  try {
+      const page = req.query.page;
+      const limit = req.query.limit;
+      const keyword = req.query.keyword;
+      const categories = await userController.getAllAdmins(page, limit, keyword);
+      return res.status(200).json({ status: true, data: categories });
+  } catch (error) {
+      console.log('Lấy tất danh sách admin lỗi: ', error);
+      return res.status(400).json({ status: false, error: error });
+  }
+})
+
+router.post('/registerAdmin', async (req, res) => {
+  const { email, password, username, role } = req.body;
+  try {
+      const result = await userController.registerAdmin(email, password, username, role);
+      res.status(200).json({ status: true, result });
+  } catch (error) {
+      res.status(400).json({status: false, message: error.message });
+  }
+});
 
 
 module.exports = router;

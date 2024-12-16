@@ -68,4 +68,19 @@ router.put('/status/:id', async (req, res) => {
     }
 });
 
+router.put('/update/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status } = req.body; // Lấy trạng thái mới từ body
+        const updatedCart = await ControllerCart.updateStatus(id, { status });
+        if (!updatedCart) {
+            return res.status(404).json({ status: false, error: 'Giỏ hàng không tồn tại' });
+        }
+        return res.status(200).json({ status: true, data: updatedCart });
+    } catch (error) {
+        console.error('Lỗi khi cập nhật:', error.message);
+        return res.status(500).json({ status: false, error: 'Lỗi' });
+    }
+});
+
 module.exports = router;

@@ -38,9 +38,14 @@ const addCart = async (user, products) => {
         }
 
         const cart = new ModelCart({
-            user: { _id: userInDB._id, name: userInDB.username }, // Truyền thêm tên người dùng
+            user: { 
+                _id: userInDB._id, 
+                name: userInDB.username 
+            },
             products: productsInCart,
             total,
+            shippingAddress: userInDB.address || '',
+            paymentMethod: 'pay_online',
         });
 
         const savedCart = await cart.save();
@@ -65,7 +70,7 @@ const addCart = async (user, products) => {
         return {
             status: true,
             message: "Mua sản phẩm thành công.",
-            feedback: savedCart,
+            cart: savedCart,
         };
 
     } catch (error) {
@@ -108,5 +113,7 @@ const updateStatus = async (idCart, updateData) => {
         throw new Error('Cập nhật tình trạng đơn hàng lỗi');
     }
 };
+
+
 
 module.exports = { addCart, getCartsByUserId, updateStatus, getAllCarts };
